@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: Download artifact from previous workflow (with run id)
+        uses: actions/download-artifact@v4
+        with:
+          name: info-job-1-result-${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
+      - name: Echo message if artifact exists
+        run: |
+          if [ -f "result.txt" ]; then
+            echo "info-job-1-result artifact was found! Result:"
+            cat result.txt
+          else
+            echo "info-job-1-result artifact not found."
+          fi
+
       - name: Run post-PR tasks
         run: |
           echo "PR workflow completed successfully!"
