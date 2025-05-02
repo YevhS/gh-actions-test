@@ -1,0 +1,28 @@
+name: Post-PR Workflow
+
+on:
+  workflow_run:
+    workflows: ["PR Workflow"]
+    types:
+      - completed
+
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Run post-PR tasks
+        run: |
+          echo "PR workflow completed successfully!"
+          echo "Running post-PR tasks..."
+          echo "Workflow run ID: ${{ github.event.workflow_run.id }}"
+          echo "Post-PR tasks completed!"
+
+  on-failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Handle failure
+        run: |
+          echo "PR workflow failed!"
+          echo "Performing failure handling tasks..."
