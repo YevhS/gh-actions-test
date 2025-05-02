@@ -25,15 +25,15 @@ jobs:
           echo "SPECIAL_VAR=true" >> $GITHUB_ENV
           echo "SPECIAL_VAR=true" > result.txt
 
+      - name: Wait for manual cancellation
+        run: sleep 60
+
       - name: Upload artifact if SPECIAL_VAR=true (with run id)
         if: env.SPECIAL_VAR == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: info-job-1-result-${{ github.run_id }}
           path: result.txt
-
-      - name: Wait for manual cancellation
-        run: sleep 60
 
   info-job-2:
     runs-on: ubuntu-latest
