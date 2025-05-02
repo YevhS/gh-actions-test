@@ -9,26 +9,26 @@ on:
 jobs:
   on-success:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion != 'success' }}
     steps:
       - name: Download artifact by API (with run id)
         uses: actions/github-script@v7
         with:
           script: |
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: context.payload.workflow_run.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
             });
             let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
               return artifact.name === `info-job-1-result-${context.payload.workflow_run.id}`;
             })[0];
             if (matchArtifact) {
               let download = await github.rest.actions.downloadArtifact({
-                 owner: context.repo.owner,
-                 repo: context.repo.repo,
-                 artifact_id: matchArtifact.id,
-                 archive_format: 'zip',
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: matchArtifact.id,
+                archive_format: 'zip',
               });
               const fs = require('fs');
               const path = require('path');
@@ -41,51 +41,20 @@ jobs:
               console.log('Artifact not found, skipping download.');
             }
 
-      - name: Unzip artifact if present
+      - name: Rerun all failed jobs if artifact present
+        uses: actions/github-script@v7
         if: exists('${{ runner.temp }}/artifacts/result.zip')
-        run: unzip "${{ runner.temp }}/artifacts/result.zip" -d "${{ runner.temp }}/artifacts"
-
-      - name: Get and log all jobs and statuses of triggering workflow
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const runId = context.payload.workflow_run.id;
-            const { owner, repo } = context.repo;
-            const jobs = await github.rest.actions.listJobsForWorkflowRun({
-              owner,
-              repo,
-              run_id: runId,
-              per_page: 100
-            });
-            console.log('Jobs for workflow run:', runId);
-            jobs.data.jobs.forEach(job => {
-              console.log(`- ${job.name}: ${job.conclusion || job.status}`);
-            });
-
-      - name: Rerun 'info-job-1' job in the triggering workflow
-        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.RERUN_TOKEN }}
           script: |
             const runId = context.payload.workflow_run.id;
             const { owner, repo } = context.repo;
-            const jobsResp = await github.rest.actions.listJobsForWorkflowRun({
+            await github.rest.actions.reRunWorkflowFailedJobs({
               owner,
               repo,
-              run_id: runId,
-              per_page: 100
+              run_id: runId
             });
-            const targetJob = jobsResp.data.jobs.find(j => j.name === 'info-job-1');
-            if (!targetJob) {
-              core.setFailed('Job "info-job-1" was not found!');
-              return;
-            }
-            await github.rest.actions.reRunJobForWorkflowRun({
-              owner,
-              repo,
-              job_id: targetJob.id
-            });
-            console.log(`Requested rerun of job 'info-job-1' (Job ID: ${targetJob.id})`);
+            console.log('Requested rerun of all failed jobs.');
 
       - name: Run post-PR tasks
         run: |

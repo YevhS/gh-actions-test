@@ -1,4 +1,4 @@
-# GitHub Actions Test Repository 
+# GitHub Actions Test Repository  
 
 This repository demonstrates GitHub Actions workflows for PR automation.
 
