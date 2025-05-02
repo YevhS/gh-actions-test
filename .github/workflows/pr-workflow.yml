@@ -28,15 +28,14 @@ jobs:
       - name: Wait for manual cancellation
         run: sleep 60
 
-      - name: Upload artifact if SPECIAL_VAR=true (with run id)
-        if: ${{ cancelled() && env.SPECIAL_VAR == 'false' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: info-job-1-result-${{ github.run_id }}
-          path: result.txt
+#      - name: Upload artifact if SPECIAL_VAR=true (with run id)
+#        if: ${{ cancelled() && env.SPECIAL_VAR == 'false' }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: info-job-1-result-${{ github.run_id }}
+#          path: result.txt
 
   info-job-2:
-    if: always()
     runs-on: ubuntu-latest
     needs: info-job-1
     steps:
@@ -51,3 +50,16 @@ jobs:
           echo "Run number: ${{ github.run_number }}"
           echo "Server URL: ${{ github.server_url }}"
           echo "SHA: ${{ github.sha }}"
+
+  rerun-job:
+    if: ${{ always() && env.SPECIAL_VAR == 'true' }}
+    runs-on: ubuntu-latest
+    needs:
+      - info-job-1
+      - info-job-2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Rerun failed jobs
+        run: gh run rerun ${{ github.run_id }} --failed
