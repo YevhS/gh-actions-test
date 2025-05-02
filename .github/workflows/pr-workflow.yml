@@ -36,6 +36,7 @@ jobs:
           path: result.txt
 
   info-job-2:
+    if: always()
     runs-on: ubuntu-latest
     needs: info-job-1
     steps:
