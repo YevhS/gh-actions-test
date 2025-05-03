@@ -21,8 +21,9 @@ jobs:
           echo "Actor: ${{ github.actor }}"
 
       - name: Export SPECIAL_VAR as output
-        id: export_special
-        run: echo "special_var=${SPECIAL_VAR}" >> $GITHUB_OUTPUT
+        run: |
+          echo "SPECIAL_VAR=true" >> $GITHUB_ENV 
+          echo "SPECIAL_VAR=${{ env.SPECIAL_VAR }}" >> cancelled-job-${{ github.run_id }}-${{ github.run_attempt }}.txt
 
       - name: Wait for manual cancellation
         run: sleep 60
@@ -31,8 +32,8 @@ jobs:
         if: ${{ cancelled() && env.SPECIAL_VAR == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: cancelled-job-${{ github.run_id }}-${{ github.run_number }}
-          path: cancelled-job-${{ github.run_id }}-${{ github.run_number }}.txt
+          name: cancelled-job-${{ github.run_id }}-${{ github.run_attempt }}
+          path: cancelled-job-${{ github.run_id }}-${{ github.run_attempt }}.txt
 
   info-job-2:
     runs-on: ubuntu-latest
