@@ -6,8 +6,8 @@ on:
     types:
       - completed
 
-#permissions:
-#  actions: write
+permissions:
+  actions: write
 
 jobs:
   on-success:
@@ -18,6 +18,7 @@ jobs:
         id: check-artifact
         uses: actions/github-script@v7
         with:
+          github-token: ${{ github.token }}
           script: |
             const runId = context.payload.workflow_run.id;
             const attemptNumber = context.payload.workflow_run.run_attempt;
@@ -46,9 +47,13 @@ jobs:
         with:
           github-token: ${{ github.token }}
           script: |
-            await github.rest.actions.reRunWorkflowFailedJobs({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id
-            });
-            console.log('Requested rerun of all failed jobs.');
+            try {
+              await github.rest.actions.reRunWorkflowFailedJobs({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.payload.workflow_run.id
+              });
+              console.log('Requested rerun of all failed jobs.');
+            } catch (error) {
+              core.setFailed(`Failed to rerun jobs: ${error.message}`);
+            }
