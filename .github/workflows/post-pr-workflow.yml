@@ -16,13 +16,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const runId = context.payload.workflow_run.id;
+            const attemptNumber = context.payload.workflow_run.run_attempt;
+            
             const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
+              run_id: runId,
             });
             
-            const cancelledJobFileName = `info-job-1-result-${context.payload.workflow_run.id}`;
+            const cancelledJobFileName = `cancelled-job-${runId}-${attemptNumber}.txt`;
             const cancelledJobFile = allArtifacts.data.artifacts.find(
               artifact => artifact.name === cancelledJobFileName
             );
