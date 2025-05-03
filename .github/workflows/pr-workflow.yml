@@ -21,8 +21,7 @@ jobs:
           echo "Actor: ${{ github.actor }}"
 
       - name: Export SPECIAL_VAR as output
-        id: export_special
-        run: echo "special_var=${SPECIAL_VAR}" >> $GITHUB_OUTPUT
+        run: echo "SPECIAL_VAR=true" >> $GITHUB_ENV
 
       - name: Wait for manual cancellation
         run: sleep 60
