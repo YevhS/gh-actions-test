@@ -5,6 +5,8 @@ on:
     workflows: ["PR Workflow"]
     types:
       - completed
+    branches-ignore:
+      - master
 
 permissions:
   actions: write
