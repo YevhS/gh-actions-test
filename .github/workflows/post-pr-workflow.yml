@@ -6,8 +6,8 @@ on:
     types:
       - completed
 
-permissions:
-  actions: write
+#permissions:
+#  actions: write
 
 jobs:
   on-success:
