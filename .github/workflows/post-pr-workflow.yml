@@ -25,7 +25,7 @@ jobs:
               run_id: runId,
             });
             
-            const cancelledJobFileName = `cancelled-job-${runId}-${attemptNumber}.txt`;
+            const cancelledJobFileName = `cancelled-job-${runId}-${attemptNumber}`;
             const cancelledJobFile = allArtifacts.data.artifacts.find(
               artifact => artifact.name === cancelledJobFileName
             );
